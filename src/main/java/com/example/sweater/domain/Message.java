@@ -44,7 +44,7 @@ public class Message {
         return author != null ? author.getUsername() : "<none>";
     }
 
-    public User getAuthor(User user) {
+    public User getAuthor() {
         return author;
     }
 
