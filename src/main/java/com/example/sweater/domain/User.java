@@ -17,14 +17,14 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @NotBlank(message = "Username can't be empty")
+    @NotBlank(message = "Username cannot be empty")
     private String username;
-    @NotBlank(message = "Password can't be empty")
+    @NotBlank(message = "Password cannot be empty")
     private String password;
     private boolean active;
 
-    @Email(message = "Email isn't correct")
-    @NotBlank(message = "Email can't be empty")
+    @Email(message = "Email is not correct")
+    @NotBlank(message = "Email cannot be empty")
     private String email;
     private String activationCode;
 
@@ -57,7 +57,7 @@ public class User implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id.equals(user.id);
+        return Objects.equals(id, user.id);
     }
 
     @Override

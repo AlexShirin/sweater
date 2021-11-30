@@ -5,7 +5,6 @@ import com.example.sweater.domain.dto.CaptchaResponseDto;
 import com.example.sweater.service.UserSevice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -28,7 +26,7 @@ public class RegistrationController {
     @Autowired
     private UserSevice userSevice;
 
-    @Value("recaptcha.secret")
+    @Value("${recaptcha.secret}")
     private String secret;
 
     @Autowired
@@ -57,18 +55,21 @@ public class RegistrationController {
         boolean isConfirmEmpty = StringUtils.isEmpty(passwordConfirm);
 
         if (isConfirmEmpty) {
-            model.addAttribute("password2Error", "Password confirmation can't be empty");
+            model.addAttribute("password2Error", "Password confirmation cannot be empty");
         }
-        
+
         if (user.getPassword() != null && !user.getPassword().equals(passwordConfirm)) {
             model.addAttribute("passwordError", "Passwords are different!");
         }
 
         if (isConfirmEmpty || bindingResult.hasErrors() || !response.isSuccess()) {
             Map<String, String> errors = ControllerUtils.getErrors(bindingResult);
+
             model.mergeAttributes(errors);
+
             return "registration";
         }
+
         if (!userSevice.addUser(user)) {
             model.addAttribute("usernameError", "User exists!");
             return "registration";
@@ -78,7 +79,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/activate/{code}")
-    public String activate(Model model, @PathVariable String code){
+    public String activate(Model model, @PathVariable String code) {
         boolean isActivated = userSevice.activateUser(code);
 
         if (isActivated) {
@@ -86,7 +87,7 @@ public class RegistrationController {
             model.addAttribute("message", "User successfully activated");
         } else {
             model.addAttribute("messageType", "danger");
-            model.addAttribute("message", "Activation code isn't found!");
+            model.addAttribute("message", "Activation code is not found!");
         }
 
         return "login";

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +22,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Controller
 public class MainController {
@@ -41,7 +38,7 @@ public class MainController {
 
     @GetMapping("/main")
     public String main(@RequestParam(required = false, defaultValue = "") String filter, Model model) {
-        Iterable<Message> messages = messageRepo.findAll();
+        Iterable<Message> messages;
 
         if (filter != null && !filter.isEmpty()) {
             messages = messageRepo.findByTag(filter);
@@ -63,7 +60,7 @@ public class MainController {
             Model model,
             @RequestParam("file") MultipartFile file
     ) throws IOException {
-        message.getAuthor();
+        message.setAuthor(user);
 
         if (bindingResult.hasErrors()) {
             Map<String, String> errorsMap = ControllerUtils.getErrors(bindingResult);
@@ -86,7 +83,7 @@ public class MainController {
     }
 
     private void saveFile(@Valid Message message, @RequestParam("file") MultipartFile file) throws IOException {
-        if (!file.isEmpty() && !file.getOriginalFilename().isEmpty()) {
+        if (file != null && !file.getOriginalFilename().isEmpty()) {
             File uploadDir = new File(uploadPath);
 
             if (!uploadDir.exists()) {
@@ -94,11 +91,11 @@ public class MainController {
             }
 
             String uuidFile = UUID.randomUUID().toString();
-            String resultFileName = uuidFile + "." + file.getOriginalFilename();
+            String resultFilename = uuidFile + "." + file.getOriginalFilename();
 
-            file.transferTo(new File(uploadPath + "/" + resultFileName));
+            file.transferTo(new File(uploadPath + "/" + resultFilename));
 
-            message.setFilename(resultFileName);
+            message.setFilename(resultFilename);
         }
     }
 
@@ -135,9 +132,11 @@ public class MainController {
             if (!StringUtils.isEmpty(text)) {
                 message.setText(text);
             }
+
             if (!StringUtils.isEmpty(tag)) {
                 message.setTag(tag);
             }
+
             saveFile(message, file);
 
             messageRepo.save(message);
